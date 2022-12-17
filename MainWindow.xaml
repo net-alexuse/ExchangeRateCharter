@@ -4,9 +4,58 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExchangeRateCharter"
+        xmlns:dvc="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=DotNetProjects.DataVisualization.Toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="800" Width="1280" ResizeMode="NoResize">
+    <Window.Resources>
+        <Style x:Key="DataPointStyle1" TargetType="{x:Type dvc:LineDataPoint}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="dvc:LineDataPoint">
+                        <Grid>
+                            <Ellipse Visibility="Hidden"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+    </Window.Resources>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <TextBlock HorizontalAlignment="Left" Margin="80,19,0,0" TextWrapping="Wrap" Text="Начальная дата" VerticalAlignment="Top"/>
+        <DatePicker Grid.Row="0" SelectedDate="{Binding Path=StartDate, Mode=TwoWay}" ToolTip="Выбор начальной даты для графика" Name="datePickerStartDate" HorizontalAlignment="Left" Margin="80,40,0,0" VerticalAlignment="Top" Width="240" Height="25" SelectedDateFormat="Long"/>
 
+        <TextBlock HorizontalAlignment="Left" Margin="400,19,0,0" TextWrapping="Wrap" Text="Конечная дата" VerticalAlignment="Top"/>
+        <DatePicker Grid.Row="0" SelectedDate="{Binding Path=EndDate, Mode=TwoWay}" ToolTip="Выбор конечной даты для графика" Name="datePickerEndDate" HorizontalAlignment="Left" Margin="400,40,0,0" VerticalAlignment="Top" Width="240" Height="25" SelectedDateFormat="Long"/>
+
+        <TextBlock HorizontalAlignment="Left" Margin="800,19,0,0" TextWrapping="Wrap" Text="Валюта" VerticalAlignment="Top"/>
+        <ComboBox Grid.Row="0" Name ="Currency" ItemsSource="{Binding Path=Currencies}" SelectedValue="{Binding SelectedCurrency}" Margin="800,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="120" Height="25"/>
+
+        <Button Grid.Row="0" Name ="AcceptButton" Content="GetCurrrency" Command="{Binding ButtonCommand}" HorizontalAlignment="Left" Margin="960,40,0,0" VerticalAlignment="Top" Width="200" Height="25"/>
+
+
+
+        <Canvas Grid.Row="1" Grid.RowSpan="3">
+            <dvc:Chart Name="mcChart" Width="1280" Height="460">
+                <dvc:Chart.Series>
+                    <dvc:LineSeries ItemsSource="{Binding ValuesForChart, UpdateSourceTrigger=PropertyChanged}" 
+                                    IndependentValueBinding="{Binding Date}" 
+                                    DependentValueBinding="{Binding Cur_OfficialRate}"
+                                    DataPointStyle="{StaticResource DataPointStyle1}">
+                        <dvc:LineSeries.Title>
+                            <Label />
+                        </dvc:LineSeries.Title>
+                    </dvc:LineSeries>
+                </dvc:Chart.Series>
+            </dvc:Chart>
+        </Canvas>
     </Grid>
 </Window>
