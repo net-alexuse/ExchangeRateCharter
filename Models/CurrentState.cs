@@ -15,8 +15,8 @@ namespace ExchangeRateCharter.Models
             {
                 if (value > DateTime.Today)
                     _endDate = DateTime.Today;
-                else if (value < _startDate)
-                    _endDate = _startDate;
+                else if (value <= _startDate)
+                    _endDate = _startDate.AddDays(1);
                 else
                     _endDate = value;
             }
@@ -29,7 +29,7 @@ namespace ExchangeRateCharter.Models
                 if (value <= DateTime.Today.AddYears(-5))
                     _startDate = DateTime.Today.AddYears(-5);
                 else if (value >= _endDate)
-                    _startDate = _endDate;
+                    _startDate = _endDate.AddDays(-1);
                 else
                     _startDate = value;
             }
