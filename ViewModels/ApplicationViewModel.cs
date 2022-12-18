@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows;
 using ExchangeRateCharter.Models;
 using ExchangeRateCharter.ViewModels;
+using System.Text.Json;
 
 namespace ExchangeRateCharter.ViewModels
 {
@@ -22,10 +23,7 @@ namespace ExchangeRateCharter.ViewModels
             _selectedState = new CurrentState();
             ValuesForChart = new ObservableCollection<RateShort>();
             Currencies = new ObservableCollection<string>() { "USD", "RUB", "EUR" };
-
-            //GetRates = new DelegateCommand<string>(str => {Currencies.Add(str);});
             ButtonCommand = new RelayCommand(o => AcceptButton_Click(_selectedState));
-
             httpClient = new HttpClient();
         }
         public DateTime StartDate
@@ -38,46 +36,52 @@ namespace ExchangeRateCharter.ViewModels
             get { return _selectedState.EndDate; }
             set { _selectedState.EndDate = value; }
         }
-
-
-
-        async Task<ObservableCollection<RateShort>> GetResult(CurrentState currentState, CancellationToken cancellationToken)
+        private bool _isEnabled = true;
+        public bool IsEnabled
         {
-            var httpResult = await httpClient.GetAsync($"https://localhost:5002/Currencies?startDate=" +
-                $"{currentState.StartDate}" +
-                $"&endDate={currentState.EndDate}&abreviature=" +
-                $"{currentState.SelectedCurrency}", cancellationToken);
-
-            if (!httpResult.IsSuccessStatusCode)
-                MessageBox.Show("Server Lost");
-
-            var rateShortCollection = new ObservableCollection<RateShort>();
-
-            return rateShortCollection;
+            get { return _isEnabled; }
+            set
+            {
+                _isEnabled = value;
+                OnPropertyChanged("IsEnabled");
+            }
         }
 
-        //public DelegateCommand<string> GetRates { get; }
-        public ObservableCollection<string> Currencies { get; set; }
+        async Task GetResult(CurrentState currentState)
+        {
+            try
+            {
+                var httpResult = await httpClient.GetAsync($"https://localhost:44325/Currency?startDate=" +
+                                                        $"{currentState.StartDate.ToString("yyyy-MM-dd")}" +
+                                                        $"&endDate={currentState.EndDate.ToString("yyyy-MM-dd")}&abbreviation=" +
+                                                        $"{currentState.SelectedCurrency}", cancellationToken);
 
+                string content = await httpResult.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                if (httpResult.IsSuccessStatusCode)
+                {
+                    ValuesForChart = JsonSerializer.Deserialize<ObservableCollection<RateShort>>(content);
+                    OnPropertyChanged("ValuesForChart");
+                }
+                else if (httpResult.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    ResponseContent responseContent = JsonSerializer.Deserialize<ResponseContent>(content);
+                    MessageBox.Show($"Ответ от сервера: {responseContent.Message}");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public ObservableCollection<string> Currencies { get; set; }
 
         public ObservableCollection<RateShort> ValuesForChart { get; set; }
 
         public ICommand ButtonCommand { get; set; }
 
-        public void GetRandom()
-        {
-            ValuesForChart.Clear();
-            Random random = new Random();
-            int numberOfResults = random.Next(10, 1500);
-            DateTime date = DateTime.Today.AddYears(-5);
-            for (int i = 0; i < numberOfResults; i++, date = date.AddDays(1))
-            {
-                var key = date;
-                var value = random.Next(50);
-                ValuesForChart.Add(new RateShort() { Date = key, Cur_OfficialRate = value });
-            }
-            OnPropertyChanged("Values");
-        }
         public string? SelectedCurrency
         {
             get { return _selectedState.SelectedCurrency; }
@@ -89,14 +93,16 @@ namespace ExchangeRateCharter.ViewModels
         private readonly HttpClient httpClient;
         private CancellationToken cancellationToken;
         private CurrentState _selectedState { get; set; }
-        private void AcceptButton_Click(CurrentState currentState)
+        private async void AcceptButton_Click(CurrentState currentState)
         {
             if (string.IsNullOrEmpty(currentState.SelectedCurrency))
+            {
                 MessageBox.Show("Выберите валюту");
-
-            //("Начальная дата" + currentState.StartDate.ToString() + $"/n" + "Конечная дата" + currentState.EndDate.ToString() + currentState.SelectedCurrency);
-            GetRandom();
-            var result = GetResult(currentState, cancellationToken);
+                return;
+            }
+            IsEnabled = false;
+            await GetResult(currentState);
+            IsEnabled = true;
         }
 
     }

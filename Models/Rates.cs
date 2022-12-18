@@ -7,22 +7,17 @@ using System.Threading.Tasks;
 
 namespace ExchangeRateCharter.Models
 {
-    internal class Rate
-    {
-        [Key]
-        public int Cur_ID { get; set; }
-        public DateTime Date { get; set; }
-        public string? Cur_Abbreviation { get; set; }
-        public int Cur_Scale { get; set; }
-        public string? Cur_Name { get; set; }
-        public decimal? Cur_OfficialRate { get; set; }
-    }
-
     public class RateShort
     {
         public int Cur_ID { get; set; }
         [Key]
-        public System.DateTime Date { get; set; }
+        public DateTime Date { get; set; }
+        //{
+        //    get { return _date.ToString("dd.MM.yyyy"); }
+        //    set { _date = Convert.ToDateTime(value); }
+        //}
+
         public decimal? Cur_OfficialRate { get; set; }
+        //public System.DateTime _date { get; set; }
     }
 }

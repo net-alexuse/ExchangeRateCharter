@@ -39,20 +39,18 @@
         <TextBlock HorizontalAlignment="Left" Margin="800,19,0,0" TextWrapping="Wrap" Text="Валюта" VerticalAlignment="Top"/>
         <ComboBox Grid.Row="0" Name ="Currency" ItemsSource="{Binding Path=Currencies}" SelectedValue="{Binding SelectedCurrency}" Margin="800,40,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="120" Height="25"/>
 
-        <Button Grid.Row="0" Name ="AcceptButton" Content="GetCurrrency" Command="{Binding ButtonCommand}" HorizontalAlignment="Left" Margin="960,40,0,0" VerticalAlignment="Top" Width="200" Height="25"/>
+        <Button Grid.Row="0" Name ="AcceptButton" IsEnabled="{Binding Path=IsEnabled}" Content="Получить" Command="{Binding ButtonCommand}" HorizontalAlignment="Left" Margin="960,40,0,0" VerticalAlignment="Top" Width="200" Height="25"/>
 
 
 
         <Canvas Grid.Row="1" Grid.RowSpan="3">
-            <dvc:Chart Name="mcChart" Width="1280" Height="460">
+            <dvc:Chart Name="mcChart" Width="1380" Height="580">
                 <dvc:Chart.Series>
                     <dvc:LineSeries ItemsSource="{Binding ValuesForChart, UpdateSourceTrigger=PropertyChanged}" 
                                     IndependentValueBinding="{Binding Date}" 
                                     DependentValueBinding="{Binding Cur_OfficialRate}"
                                     DataPointStyle="{StaticResource DataPointStyle1}">
-                        <dvc:LineSeries.Title>
-                            <Label />
-                        </dvc:LineSeries.Title>
+ 
                     </dvc:LineSeries>
                 </dvc:Chart.Series>
             </dvc:Chart>
